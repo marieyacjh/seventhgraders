@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mario Vocabulary Battle</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #1b1b1b;
+  color: white;
+}
+.screen { display: none; padding: 20px; }
+.active { display: block; }
+button { padding: 10px; margin: 5px; cursor: pointer; }
+input { padding: 5px; margin: 3px; }
+.container { display: flex; justify-content: space-between; }
+.playerBox {
+  width: 48%;
+  border: 2px solid white;
+  padding: 10px;
+}
+.hearts { color: red; }
+.character { cursor: pointer; padding: 5px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<!-- MAIN MENU -->
+<div id="menu" class="screen active">
+  <h1>🍄 Mario Vocabulary Battle</h1>
+  <button onclick="showScreen('editor')">Edit Questions</button>
+  <button onclick="showScreen('select')">Play</button>
+</div>
+
+<!-- EDITOR -->
+<div id="editor" class="screen">
+  <h2>Edit Questions (Max 30)</h2>
+  <div id="qList"></div>
+  <input id="word" placeholder="Word">
+  <input id="a1" placeholder="Choice 1">
+  <input id="a2" placeholder="Choice 2">
+  <button onclick="addQ()">Add</button>
+  <button onclick="backMenu()">Back</button>
+</div>
+
+<!-- CHARACTER SELECT -->
+<div id="select" class="screen">
+  <h2>Select Characters</h2>
+  <div>
+    <h3>Player 1</h3>
+    <span class="character" onclick="pickChar(1,'Mario')">Mario</span>
+    <span class="character" onclick="pickChar(1,'Luigi')">Luigi</span>
+  </div>
+  <div>
+    <h3>Player 2</h3>
+    <span class="character" onclick="pickChar(2,'Peach')">Peach</span>
+    <span class="character" onclick="pickChar(2,'Yoshi')">Yoshi</span>
+  </div>
+  <button onclick="startGame()">Start Battle</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <h2>Battle Mode</h2>
+  <div class="container">
+
+    <div class="playerBox">
+      <h3 id="p1name">Player 1</h3>
+      <div class="hearts" id="p1hearts">❤️❤️❤️</div>
+      <div>Score: <span id="p1score">0</span></div>
+      <p id="qtext"></p>
+      <button onclick="answer(1,0)"></button>
+      <button onclick="answer(1,1)"></button>
+    </div>
+</html>
