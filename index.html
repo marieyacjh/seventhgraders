@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Duel: Stadium Edition</title>
+    <title>Pokémon Stadium Duel</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --pk-blue: #3b4cca;
-            --pk-red: #ff0000;
-        }
-
+        :root { --pk-blue: #3b4cca; --pk-red: #ff0000; }
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #000;
@@ -20,277 +16,195 @@
             overflow: hidden;
             user-select: none;
         }
-
         .pixel-font { font-family: 'Press Start 2P', cursive; }
 
-        /* Pokémon Themed Background */
+        /* Background from Wallpapers.com/pokemon-stadium */
         .stadium-bg {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
-                        url('https://images.alphacoders.com/108/1087118.jpg');
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                            url('https://wallpapers.com/images/featured/pokemon-stadium-v0m509939q3vclq7.jpg');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
 
-        .split-screen {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            height: 100vh;
-            width: 100vw;
-        }
+        .split-screen { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; width: 100vw; }
+        .team-panel { display: flex; flex-direction: column; justify-content: space-between; padding: 2rem; transition: background 0.3s ease; }
+        .team-1 { border-right: 6px solid rgba(0,0,0,0.5); background: rgba(59, 76, 202, 0.25); }
+        .team-2 { background: rgba(255, 0, 0, 0.25); }
 
-        .team-panel {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 2rem;
-            transition: background 0.3s ease;
-        }
+        .hp-container { width: 100%; height: 24px; background: #333; border: 4px solid #000; border-radius: 12px; overflow: hidden; }
+        .hp-fill { height: 100%; width: 100%; background: #4ade80; transition: width 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
 
-        .team-1 { border-right: 6px solid #000; background: rgba(59, 76, 202, 0.2); }
-        .team-2 { background: rgba(255, 0, 0, 0.2); }
-
-        /* HP Bars */
-        .hp-container {
-            width: 100%;
-            height: 20px;
-            background: #333;
-            border: 3px solid #000;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .hp-fill {
-            height: 100%;
-            width: 100%;
-            background: #4ade80;
-            transition: width 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-
-        /* Touch-Friendly Combat Buttons */
         .combat-btn {
-            width: 100%;
-            padding: 2.5rem 1rem;
-            border-radius: 20px;
-            border: 5px solid rgba(255,255,255,0.2);
-            font-weight: 900;
-            text-transform: uppercase;
-            font-size: 1.5rem;
-            box-shadow: 0 8px 0 rgba(0,0,0,0.4);
-            transition: all 0.1s;
+            width: 100%; padding: 2.5rem 1rem; border-radius: 24px; border: 6px solid rgba(255,255,255,0.3);
+            font-weight: 900; text-transform: uppercase; font-size: 1.8rem; box-shadow: 0 10px 0 rgba(0,0,0,0.4); transition: all 0.1s;
         }
         .combat-btn:active { transform: translateY(6px); box-shadow: none; }
         .t1-color { background: linear-gradient(145deg, #3b4cca, #2a3891); }
         .t2-color { background: linear-gradient(145deg, #ff0000, #b30000); }
 
-        /* Level Up Animation */
-        #level-up-screen {
-            background: rgba(0,0,0,0.9);
-            animation: fadeIn 0.5s ease-out;
-        }
-
+        #level-up-screen { background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .nav-pill {
-            background: rgba(255, 255, 255, 0.9);
-            color: #000;
-            padding: 10px 25px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 200;
-        }
+        .nav-pill { background: white; color: #000; padding: 12px 30px; border-radius: 50px; font-size: 0.85rem; font-weight: 900; cursor: pointer; z-index: 200; }
+        .sprite-opt { cursor: pointer; transition: 0.2s; border: 5px solid transparent; border-radius: 20px; width: 80px; height: 80px; object-fit: contain; }
+        .selected-sprite { border-color: #ffde00; background: rgba(255,222,0,0.3); }
 
-        /* Sprite Selection */
-        .sprite-opt {
-            cursor: pointer;
-            transition: 0.2s;
-            border: 4px solid transparent;
-        }
-        .sprite-opt:hover { transform: scale(1.1); }
-        .selected-sprite { border-color: #ffde00; background: rgba(255,222,0,0.2); border-radius: 15px; }
+        .global-score-bar { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 100; }
+        .score-pill { background: rgba(0, 0, 0, 0.8); border: 2px solid white; padding: 8px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+        .score-val { color: #ffde00; font-weight: 900; font-size: 1.2rem; }
     </style>
 </head>
 <body class="stadium-bg">
 
-    <div class="fixed top-4 left-1/2 -translate-x-1/2 flex gap-4 z-[200]">
+    <div class="fixed top-6 left-1/2 -translate-x-1/2 flex gap-6 z-[200]">
         <div class="nav-pill pixel-font" onclick="location.reload()">HOME</div>
-        <div class="nav-pill pixel-font" id="back-btn" onclick="goBack()" style="display:none;">BACK</div>
     </div>
 
-    <div id="screen-menu" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 overflow-y-auto p-10">
-        <h1 class="pixel-font text-4xl md:text-5xl text-yellow-400 mb-8 text-center drop-shadow-[0_4px_0_rgba(0,0,0,1)]">
-            POKÉMON DUEL
-        </h1>
-
-        <div class="flex flex-col md:flex-row gap-8 mb-12 w-full max-w-5xl">
-            <div class="flex-1 bg-blue-900/40 p-6 rounded-3xl border-2 border-blue-500">
-                <input type="text" id="t1-name-input" value="TEAM ALPHA" class="w-full bg-black/50 p-3 rounded-xl text-center font-black text-xl mb-4 border border-blue-400">
-                <p class="text-xs text-blue-200 mb-3 text-center font-bold">CHOOSE YOUR POKÉMON</p>
+    <div id="screen-menu" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/90 overflow-y-auto p-10">
+        <h1 class="pixel-font text-5xl text-yellow-400 mb-10 text-center drop-shadow-[0_6px_0_rgba(0,0,0,1)]">POKÉMON STADIUM</h1>
+        
+        <div class="flex flex-col md:flex-row gap-10 mb-10 w-full max-w-5xl">
+            <div class="flex-1 bg-blue-900/30 p-6 rounded-[40px] border-4 border-blue-500">
+                <input type="text" id="t1-name-input" value="TEAM ALPHA" class="w-full bg-black/60 p-3 rounded-2xl text-center font-black text-xl mb-4 text-white uppercase">
                 <div class="grid grid-cols-4 gap-2" id="t1-sprite-grid"></div>
             </div>
-
-            <div class="flex-1 bg-red-900/40 p-6 rounded-3xl border-2 border-red-500">
-                <input type="text" id="t2-name-input" value="TEAM OMEGA" class="w-full bg-black/50 p-3 rounded-xl text-center font-black text-xl mb-4 border border-red-400">
-                <p class="text-xs text-red-200 mb-3 text-center font-bold">CHOOSE YOUR POKÉMON</p>
+            <div class="flex-1 bg-red-900/30 p-6 rounded-[40px] border-4 border-red-500">
+                <input type="text" id="t2-name-input" value="TEAM OMEGA" class="w-full bg-black/60 p-3 rounded-2xl text-center font-black text-xl mb-4 text-white uppercase">
                 <div class="grid grid-cols-4 gap-2" id="t2-sprite-grid"></div>
             </div>
         </div>
         
-        <div class="flex flex-col gap-4 w-72">
-            <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 text-blue-900 py-5 rounded-2xl font-black text-2xl shadow-[0_6px_0_#b45309] active:translate-y-1 transition-all">BATTLE START!</button>
-            <button onclick="toggleEditor(true)" class="text-gray-400 font-bold text-sm underline">EDIT VOCABULARY</button>
-        </div>
+        <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-400 px-20 py-6 rounded-3xl font-black text-3xl shadow-[0_8px_0_#b45309] active:translate-y-2 active:shadow-none">BATTLE!</button>
     </div>
 
-    <div id="screen-battle" class="hidden split-screen">
-        <div class="team-panel team-1">
-            <div class="w-full">
-                <div class="flex justify-between items-end mb-2">
-                    <span id="t1-display-name" class="pixel-font text-xs text-blue-300"></span>
-                    <div id="t1-balls" class="flex gap-1"></div>
-                </div>
-                <div class="hp-container"><div id="t1-hp" class="hp-fill"></div></div>
-            </div>
-
-            <div class="flex justify-center"><img id="t1-sprite" class="w-56 h-56 object-contain" src=""></div>
-
-            <div class="space-y-4">
-                <div class="bg-black/80 border-4 border-blue-600 p-6 rounded-3xl min-h-[120px] flex items-center justify-center">
-                    <p id="t1-question" class="text-2xl font-black text-center"></p>
-                </div>
-                <div class="grid gap-4">
-                    <button id="t1-opt-0" class="combat-btn t1-color" onclick="handleInput(0, 0)"></button>
-                    <button id="t1-opt-1" class="combat-btn t1-color" onclick="handleInput(0, 1)"></button>
-                </div>
-            </div>
+    <div id="screen-battle" class="hidden flex flex-col pt-24 min-h-screen">
+        <div id="battle-global-scores" class="global-score-bar">
+            <div class="score-pill"><span id="t1-score-label" class="pixel-font text-[10px]">ALPHA:</span><span id="t1-score-val" class="score-val">0</span></div>
+            <div class="score-pill"><span id="t2-score-label" class="pixel-font text-[10px]">OMEGA:</span><span id="t2-score-val" class="score-val">0</span></div>
         </div>
 
-        <div class="team-panel team-2">
-            <div class="w-full text-right">
-                <div class="flex justify-between items-end mb-2">
-                    <div id="t2-balls" class="flex gap-1"></div>
-                    <span id="t2-display-name" class="pixel-font text-xs text-red-300"></span>
+        <div class="split-screen flex-grow">
+            <div id="t1-panel" class="team-panel team-1">
+                <div class="w-full">
+                    <div class="flex justify-between items-end mb-3"><span id="t1-display-name" class="pixel-font text-sm text-blue-300"></span><div id="t1-balls" class="flex gap-2"></div></div>
+                    <div class="hp-container"><div id="t1-hp" class="hp-fill"></div></div>
                 </div>
-                <div class="hp-container"><div id="t2-hp" class="hp-fill"></div></div>
+                <div class="flex justify-center"><img id="t1-sprite" class="w-48 h-48 object-contain drop-shadow-2xl" src=""></div>
+                <div class="space-y-4">
+                    <div class="bg-black/85 border-4 border-blue-600 p-6 rounded-[35px] min-h-[100px] flex flex-col items-center justify-center relative">
+                        <div id="t1-point-indicator" class="text-[10px] text-yellow-400 pixel-font mb-2">WINS 5 PTS</div>
+                        <p id="t1-question" class="text-2xl font-black text-center"></p>
+                    </div>
+                    <div class="grid gap-4">
+                        <button id="t1-opt-0" class="combat-btn t1-color" onclick="handleInput(0, 0)"></button>
+                        <button id="t1-opt-1" class="combat-btn t1-color" onclick="handleInput(0, 1)"></button>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-center"><img id="t2-sprite" class="w-56 h-56 object-contain" src=""></div>
-
-            <div class="space-y-4">
-                <div class="bg-black/80 border-4 border-red-600 p-6 rounded-3xl min-h-[120px] flex items-center justify-center">
-                    <p id="t2-question" class="text-2xl font-black text-center"></p>
+            <div id="t2-panel" class="team-panel team-2">
+                <div class="w-full text-right">
+                    <div class="flex justify-between items-end mb-3"><div id="t2-balls" class="flex gap-2"></div><span id="t2-display-name" class="pixel-font text-sm text-red-300"></span></div>
+                    <div class="hp-container"><div id="t2-hp" class="hp-fill"></div></div>
                 </div>
-                <div class="grid gap-4">
-                    <button id="t2-opt-0" class="combat-btn t2-color" onclick="handleInput(1, 0)"></button>
-                    <button id="t2-opt-1" class="combat-btn t2-color" onclick="handleInput(1, 1)"></button>
+                <div class="flex justify-center"><img id="t2-sprite" class="w-48 h-48 object-contain drop-shadow-2xl" src=""></div>
+                <div class="space-y-4">
+                    <div class="bg-black/85 border-4 border-red-600 p-6 rounded-[35px] min-h-[100px] flex flex-col items-center justify-center relative">
+                        <div id="t2-point-indicator" class="text-[10px] text-yellow-400 pixel-font mb-2">WINS 5 PTS</div>
+                        <p id="t2-question" class="text-2xl font-black text-center"></p>
+                    </div>
+                    <div class="grid gap-4">
+                        <button id="t2-opt-0" class="combat-btn t2-color" onclick="handleInput(1, 0)"></button>
+                        <button id="t2-opt-1" class="combat-btn t2-color" onclick="handleInput(1, 1)"></button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="level-up-screen" class="fixed inset-0 z-[150] hidden flex flex-col items-center justify-center text-center">
-        <h2 id="lvl-title" class="pixel-font text-5xl text-yellow-400 mb-8">LEVEL 2</h2>
-        <div class="flex gap-20 text-3xl font-black">
-            <div class="text-blue-400">
-                <p id="lvl-t1-name"></p>
-                <p id="lvl-t1-score" class="text-5xl mt-2">0</p>
-            </div>
-            <div class="text-red-400">
-                <p id="lvl-t2-name"></p>
-                <p id="lvl-t2-score" class="text-5xl mt-2">0</p>
-            </div>
+    <div id="level-up-screen" class="fixed inset-0 z-[150] hidden flex flex-col items-center justify-center text-center stadium-bg">
+        <h2 id="lvl-title" class="pixel-font text-6xl text-yellow-400 mb-12 drop-shadow-[0_5px_0_rgba(0,0,0,1)]">LEVEL 2</h2>
+        <div class="flex gap-20 text-4xl font-black bg-black/80 p-10 rounded-[50px] border-4 border-white/20">
+            <div class="text-blue-400"><p id="lvl-t1-name"></p><p id="lvl-t1-score" class="text-6xl">0</p></div>
+            <div class="text-red-400"><p id="lvl-t2-name"></p><p id="lvl-t2-score" class="text-6xl">0</p></div>
         </div>
-        <p class="mt-12 text-gray-400 pixel-font animate-pulse">GET READY...</p>
+        <p id="lvl-winner-points" class="mt-8 text-2xl text-yellow-300 pixel-font"></p>
     </div>
 
-    <div id="screen-editor" class="fixed inset-0 z-[300] hidden bg-slate-950 p-8 overflow-y-auto">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="pixel-font text-xl text-yellow-400 mb-6">VOCABULARY EDITOR</h2>
-            <div id="vocab-rows" class="space-y-3"></div>
-            <div class="mt-8 flex gap-4">
-                <button onclick="addRow()" class="bg-blue-600 px-6 py-2 rounded font-bold">+ ADD</button>
-                <button onclick="saveAndClose()" class="bg-green-600 px-6 py-2 rounded font-bold">SAVE</button>
-            </div>
-        </div>
-    </div>
-
-    <audio id="snd-battle" loop src="https://www.soundboard.com/handler/DownLoadTrack.ashx?cliptoken=8f27806a-0466-410a-810d-8547379d727b"></audio>
+    <audio id="snd-open" src="https://www.youtube.com/watch?v=EQEVCar9T1I#t=1"></audio> 
+    <audio id="snd-correct" src="https://www.youtube.com/watch?v=EQEVCar9T1I#t=51"></audio>
+    <audio id="snd-hit" src="https://www.youtube.com/watch?v=EQEVCar9T1I#t=12"></audio>
+    <audio id="snd-win" src="https://www.youtube.com/watch?v=EQEVCar9T1I#t=26"></audio>
 
     <script>
         const POKEMON_LIST = [
             {id: 25, name: 'Pikachu'}, {id: 4, name: 'Charmander'}, {id: 1, name: 'Bulbasaur'}, 
             {id: 7, name: 'Squirtle'}, {id: 133, name: 'Eevee'}, {id: 150, name: 'Mewtwo'},
-            {id: 94, name: 'Gengar'}, {id: 39, name: 'Jigglypuff'}
+            {id: 6, name: 'Charizard'}, {id: 143, name: 'Snorlax'}
         ];
         
-        let vocab = JSON.parse(localStorage.getItem('pkmn_sim_vocab')) || [
+        let vocab = [
             { q: "Enormous", a: "Giant", w: "Tiny" },
             { q: "Courageous", a: "Brave", w: "Fearful" },
-            { q: "Swift", a: "Fast", w: "Slow" }
+            { q: "Swift", a: "Fast", w: "Slow" },
+            { q: "Ancient", a: "Old", w: "New" }
         ];
 
         let game = {
             level: 0,
             isActive: false,
-            points: [5, 10, 20, 30, 50],
+            points: [5, 10, 20, 30, 40],
             teams: [
                 { name: "", sprite: 25, hp: 3, score: 0, currentQ: null },
                 { name: "", sprite: 4, hp: 3, score: 0, currentQ: null }
             ]
         };
 
-        function initSetup() {
+        function init() {
             const t1Grid = document.getElementById('t1-sprite-grid');
             const t2Grid = document.getElementById('t2-sprite-grid');
-            
             POKEMON_LIST.forEach(pk => {
-                const img1 = createImg(pk.id, 0);
-                const img2 = createImg(pk.id, 1);
-                t1Grid.appendChild(img1);
-                t2Grid.appendChild(img2);
+                t1Grid.appendChild(createImg(pk.id, 0));
+                t2Grid.appendChild(createImg(pk.id, 1));
             });
-            renderRows();
         }
 
         function createImg(id, teamIdx) {
             const img = document.createElement('img');
             img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-            img.className = `sprite-opt p-2 ${game.teams[teamIdx].sprite === id ? 'selected-sprite' : ''}`;
+            img.className = `sprite-opt ${game.teams[teamIdx].sprite === id ? 'selected-sprite' : ''}`;
             img.onclick = () => {
                 game.teams[teamIdx].sprite = id;
                 document.querySelectorAll(`#t${teamIdx+1}-sprite-grid img`).forEach(i => i.classList.remove('selected-sprite'));
                 img.classList.add('selected-sprite');
+                playSfx('snd-open'); // Play pokeball open sound on selection
             };
             return img;
         }
 
         function startGame() {
-            game.teams[0].name = document.getElementById('t1-name-input').value;
-            game.teams[1].name = document.getElementById('t2-name-input').value;
-            
+            game.teams[0].name = document.getElementById('t1-name-input').value.toUpperCase();
+            game.teams[1].name = document.getElementById('t2-name-input').value.toUpperCase();
             document.getElementById('screen-menu').classList.add('hidden');
             document.getElementById('screen-battle').classList.remove('hidden');
-            document.getElementById('back-btn').style.display = 'block';
-            
-            game.level = 0;
-            game.teams[0].score = 0;
-            game.teams[1].score = 0;
-            
+            playSfx('snd-open');
             startRound();
-            document.getElementById('snd-battle').play();
         }
 
         function startRound() {
             game.isActive = true;
-            game.teams.forEach(t => { t.hp = 3; });
-            
-            // Sync UI Display
+            game.teams.forEach(t => t.hp = 3);
             document.getElementById('t1-display-name').innerText = game.teams[0].name;
             document.getElementById('t2-display-name').innerText = game.teams[1].name;
             document.getElementById('t1-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${game.teams[0].sprite}.png`;
             document.getElementById('t2-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${game.teams[1].sprite}.png`;
             
+            const p = game.points[game.level];
+            document.getElementById('t1-point-indicator').innerText = `WINNER GETS ${p} PTS`;
+            document.getElementById('t2-point-indicator').innerText = `WINNER GETS ${p} PTS`;
+
             generateQuestion(0);
             generateQuestion(1);
             updateUI();
@@ -311,80 +225,65 @@
         function handleInput(teamIdx, choice) {
             if (!game.isActive) return;
             const team = game.teams[teamIdx];
+            const opponentIdx = teamIdx === 0 ? 1 : 0;
+
             if (choice === team.currentQ.correct) {
-                const opponent = teamIdx === 0 ? 1 : 0;
-                game.teams[opponent].hp--;
+                game.teams[opponentIdx].hp--;
+                playSfx('snd-correct');
             } else {
                 game.teams[teamIdx].hp--;
+                playSfx('snd-hit');
             }
             
             if (game.teams[0].hp <= 0 || game.teams[1].hp <= 0) {
                 game.isActive = false;
-                const winner = game.teams[0].hp > 0 ? 0 : 1;
-                game.teams[winner].score += game.points[game.level];
-                
-                setTimeout(showLevelEffect, 800);
+                const winnerIdx = game.teams[0].hp > 0 ? 0 : 1;
+                game.teams[winnerIdx].score += game.points[game.level];
+                updateUI();
+                setTimeout(() => showLevelScreen(winnerIdx), 1000);
             } else {
                 generateQuestion(teamIdx);
                 updateUI();
             }
         }
 
-        function showLevelEffect() {
+        function showLevelScreen(winnerIdx) {
+            playSfx('snd-win');
             const screen = document.getElementById('level-up-screen');
             game.level++;
             
-            if (game.level >= 5) {
-                alert(`CHAMPIONSHIP OVER!\nWinner: ${game.teams[0].score > game.teams[1].score ? game.teams[0].name : game.teams[1].name}`);
-                location.reload();
-                return;
-            }
-
             document.getElementById('lvl-title').innerText = `LEVEL ${game.level + 1}`;
             document.getElementById('lvl-t1-name').innerText = game.teams[0].name;
             document.getElementById('lvl-t2-name').innerText = game.teams[1].name;
             document.getElementById('lvl-t1-score').innerText = game.teams[0].score;
             document.getElementById('lvl-t2-score').innerText = game.teams[1].score;
-            
+            document.getElementById('lvl-winner-points').innerText = `${game.teams[winnerIdx].name} WON THE ROUND (+${game.points[game.level-1]} PTS!)`;
+
             screen.classList.remove('hidden');
             setTimeout(() => {
                 screen.classList.add('hidden');
-                startRound();
-            }, 3000);
+                if (game.level < 5) startRound();
+                else alert("CHAMPIONSHIP COMPLETE!");
+            }, 4000);
         }
 
         function updateUI() {
             game.teams.forEach((t, i) => {
-                const pct = (t.hp / 3) * 100;
-                document.getElementById(`t${i+1}-hp`).style.width = pct + '%';
+                document.getElementById(`t${i+1}-hp`).style.width = (t.hp / 3 * 100) + '%';
                 const balls = document.getElementById(`t${i+1}-balls`);
                 balls.innerHTML = '';
-                for(let b=0; b<3; b++) {
-                    const op = b < t.hp ? 'opacity-100' : 'opacity-20';
-                    balls.innerHTML += `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-8 h-8 ${op}">`;
-                }
+                for(let b=0; b<3; b++) balls.innerHTML += `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-8 h-8 ${b < t.hp ? '' : 'grayscale opacity-30'}">`;
             });
+            document.getElementById('t1-score-val').innerText = game.teams[0].score;
+            document.getElementById('t2-score-val').innerText = game.teams[1].score;
         }
 
-        function goBack() { location.reload(); }
-
-        // Editor Functions
-        function toggleEditor(s) { document.getElementById('screen-editor').classList.toggle('hidden', !s); }
-        function renderRows() {
-            const c = document.getElementById('vocab-rows'); c.innerHTML = '';
-            vocab.forEach((it, i) => {
-                c.innerHTML += `<div class="grid grid-cols-12 gap-2">
-                    <input class="col-span-5 p-2 bg-black rounded" value="${it.q}" onchange="vocab[${i}].q=this.value">
-                    <input class="col-span-3 p-2 bg-green-900 rounded" value="${it.a}" onchange="vocab[${i}].a=this.value">
-                    <input class="col-span-3 p-2 bg-red-900 rounded" value="${it.w}" onchange="vocab[${i}].w=this.value">
-                    <button onclick="vocab.splice(${i},1);renderRows()" class="text-red-500">✕</button>
-                </div>`;
-            });
+        function playSfx(id) {
+            const s = document.getElementById(id);
+            if(s) { s.currentTime = 0; s.play().catch(()=>{}); }
         }
-        function addRow() { vocab.push({q:"",a:"",w:""}); renderRows(); }
-        function saveAndClose() { localStorage.setItem('pkmn_sim_vocab', JSON.stringify(vocab)); toggleEditor(false); }
 
-        initSetup();
+        init();
     </script>
 </body>
 </html>
